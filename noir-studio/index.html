@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noir Studio — Fotografía de Arte</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Tenor+Sans&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #080808;
+      --dark:    #0F0F0F;
+      --surface: #161616;
+      --border:  rgba(255,255,255,0.07);
+      --gold:    #C9A84C;
+      --gold-lt: #E2C97E;
+      --white:   #F2F0EC;
+      --muted:   #666560;
+      --font-d:  'Cormorant', Georgia, serif;
+      --font-b:  'Tenor Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-b);
+      font-size: 15px;
+      line-height: 1.7;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    .cursor {
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s, width 0.25s, height 0.25s, background 0.25s;
+    }
+
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 0.5px solid var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.12s ease-out, width 0.3s, height 0.3s, opacity 0.3s;
+      opacity: 0.5;
+    }
+
+    body:hover .cursor { opacity: 1; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 3rem;
+      padding: 1.8rem 4rem;
+      transition: padding 0.4s, background 0.4s;
+      background: rgba(8,8,8,0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    nav.scrolled {
+      padding: 1.2rem 4rem;
+      background: rgba(8,8,8,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-d);
+      font-size: 1.4rem;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--gold); }
+
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+      justify-content: center;
+    }
+
+    .nav-links a {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.25s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 0.5px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      border: 0.5px solid rgba(201,168,76,0.4);
+      padding: 10px 22px;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    .nav-cta:hover {
+      background: var(--gold);
+      color: var(--black);
+      border-color: var(--gold);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 5rem 4rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-canvas {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
+    /* 3D-like grid floor effect */
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      transform: perspective(600px) rotateX(60deg) scale(2);
+      transform-origin: bottom center;
+      opacity: 0.6;
+    }
+
+    .hero-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 20%, rgba(8,8,8,0.7) 70%, var(--black) 100%);
+    }
+
+    .hero-side-text {
+      position: fixed;
+      right: -5.5rem;
+      top: 50vh;
+      transform: translateY(-50%) rotate(90deg);
+      transform-origin: center center;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-eyebrow {
+      display: none;
+    }
+
+    .hero-eyebrow-line {
+      width: 40px; height: 0.5px;
+      background: var(--gold);
+    }
+
+    .hero-eyebrow span {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .hero-title {
+      font-family: var(--font-d);
+      font-size: clamp(4rem, 9vw, 8rem);
+      font-weight: 300;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.35s ease forwards;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold);
+      font-weight: 300;
+    }
+
+    .hero-bottom-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.5s ease forwards;
+    }
+
+    .hero-desc {
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 340px;
+      line-height: 1.85;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: var(--gold);
+      text-decoration: none;
+      padding: 14px 32px;
+      transition: background 0.25s, transform 0.15s;
+      display: block;
+    }
+
+    .btn-primary:hover {
+      background: var(--gold-lt);
+      transform: translateY(-2px);
+    }
+
+    .btn-link {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.25s;
+    }
+
+    .btn-link:hover { color: var(--white); }
+
+    .btn-link-arrow {
+      width: 24px; height: 0.5px;
+      background: currentColor;
+      position: relative;
+      transition: width 0.25s;
+    }
+
+    .btn-link:hover .btn-link-arrow { width: 36px; }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap {
+      border-top: 0.5px solid var(--border);
+      border-bottom: 0.5px solid var(--border);
+      padding: 1rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .marquee-track {
+      display: inline-flex;
+      gap: 0;
+      animation: marquee 18s linear infinite;
+    }
+
+    .marquee-item {
+      font-family: var(--font-d);
+      font-size: 1.1rem;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--muted);
+      padding: 0 2.5rem;
+      border-right: 0.5px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .marquee-item span { color: var(--gold); margin-right: 0.5rem; }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── WORK / GALLERY ── */
+    .work-section {
+      padding: 8rem 4rem;
+    }
+
+    .work-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 4rem;
+    }
+
+    .section-tag {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+    }
+
+    .section-title {
+      font-family: var(--font-d);
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+
+    .work-filter {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .filter-btn {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: none;
+      padding: 6px 0;
+      border-bottom: 0.5px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      font-family: var(--font-b);
+    }
+
+    .filter-btn.active,
+    .filter-btn:hover {
+      color: var(--white);
+      border-color: var(--gold);
+    }
+
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: 300px 300px;
+      gap: 6px;
+    }
+
+    .work-item {
+      position: relative;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    .work-item:nth-child(1) { grid-column: 1 / 6; grid-row: 1; }
+    .work-item:nth-child(2) { grid-column: 6 / 9; grid-row: 1; }
+    .work-item:nth-child(3) { grid-column: 9 / 13; grid-row: 1 / 3; }
+    .work-item:nth-child(4) { grid-column: 1 / 4; grid-row: 2; }
+    .work-item:nth-child(5) { grid-column: 4 / 6; grid-row: 2; }
+    .work-item:nth-child(6) { grid-column: 6 / 9; grid-row: 2; }
+
+    .work-fill {
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.2rem;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .work-item:hover .work-fill { transform: scale(1.04); }
+
+    .wf1 { background: #1A1A1A; }
+    .wf2 { background: #252520; }
+    .wf3 { background: #1E1C18; }
+    .wf4 { background: #222222; }
+    .wf5 { background: #1C1C20; }
+    .wf6 { background: #201E1A; }
+
+    .work-label {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .work-item:hover .work-label { opacity: 1; transform: translateY(0); }
+
+    .work-label-cat {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .work-label-title {
+      font-family: var(--font-d);
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--white);
+    }
+
+    /* ── SERVICES ── */
+    .services-section {
+      padding: 8rem 4rem;
+      background: var(--surface);
+      border-top: 0.5px solid var(--border);
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 4rem;
+      border: 0.5px solid var(--border);
+    }
+
+    .service-card {
+      padding: 3rem 2.5rem;
+      border-right: 0.5px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .service-card:last-child { border-right: none; }
+    .service-card:hover { background: rgba(201,168,76,0.03); }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1.5px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+      transform-origin: left;
+    }
+
+    .service-card:hover::before { transform: scaleX(1); }
+
+    .service-num {
+      font-family: var(--font-d);
+      font-size: 4rem;
+      font-weight: 300;
+      color: rgba(201,168,76,0.1);
+      line-height: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .service-card h3 {
+      font-family: var(--font-d);
+      font-size: 1.6rem;
+      font-weight: 300;
+      margin-bottom: 0.8rem;
+      color: var(--white);
+    }
+
+    .service-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .service-price {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .service-price::before {
+      content: '';
+      width: 20px; height: 0.5px;
+      background: var(--gold);
+    }
+
+    /* ── ABOUT ── */
+    .about-section {
+      padding: 8rem 4rem;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8rem;
+      align-items: center;
+    }
+
+    .about-visual {
+      position: relative;
+    }
+
+    .about-main {
+      aspect-ratio: 3/4;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .about-main-inner {
+      font-family: var(--font-d);
+      font-size: 6rem;
+      font-weight: 300;
+      color: rgba(201,168,76,0.06);
+      letter-spacing: 0.1em;
+      user-select: none;
+    }
+
+    .about-corner-tl,
+    .about-corner-br {
+      position: absolute;
+      width: 40px; height: 40px;
+    }
+
+    .about-corner-tl {
+      top: -8px; left: -8px;
+      border-top: 1px solid var(--gold);
+      border-left: 1px solid var(--gold);
+    }
+
+    .about-corner-br {
+      bottom: -8px; right: -8px;
+      border-bottom: 1px solid var(--gold);
+      border-right: 1px solid var(--gold);
+    }
+
+    .about-float-card {
+      position: absolute;
+      bottom: -2rem;
+      right: -2.5rem;
+      background: var(--black);
+      border: 0.5px solid var(--border);
+      padding: 1.5rem 1.8rem;
+      width: 200px;
+    }
+
+    .about-float-num {
+      font-family: var(--font-d);
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .about-float-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .about-text .section-title { margin-bottom: 1.5rem; }
+
+    .about-text > p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      line-height: 1.85;
+    }
+
+    .about-divider {
+      width: 40px; height: 0.5px;
+      background: var(--gold);
+      margin: 2rem 0;
+    }
+
+    .about-stats-row {
+      display: flex;
+      gap: 3rem;
+    }
+
+    .astat-num {
+      font-family: var(--font-d);
+      font-size: 2.2rem;
+      font-weight: 300;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .astat-label {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── BRAND GUIDE ── */
+    .brand-section {
+      padding: 8rem 4rem;
+      background: var(--surface);
+      border-top: 0.5px solid var(--border);
+    }
+
+    .brand-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      margin-top: 4rem;
+      align-items: start;
+    }
+
+    .brand-palette {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .brand-subtitle {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .palette-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .palette-swatch {
+      flex: 1;
+      height: 56px;
+      border-radius: 1px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 6px;
+    }
+
+    .swatch-label {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+    }
+
+    .swatch-hex {
+      font-size: 9px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .brand-typography {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .brand-type-sample {
+      border-bottom: 0.5px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .type-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .type-display {
+      font-family: var(--font-d);
+      font-size: 3rem;
+      font-weight: 300;
+      color: var(--white);
+      line-height: 1;
+    }
+
+    .type-body {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 0.5rem;
+    }
+
+    .type-name {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      margin-top: 0.5rem;
+    }
+
+    /* ── CONTACT ── */
+    .contact-section {
+      padding: 8rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-bg-text {
+      position: absolute;
+      bottom: -2rem; right: -1rem;
+      font-family: var(--font-d);
+      font-size: clamp(8rem, 18vw, 15rem);
+      font-weight: 300;
+      color: rgba(201,168,76,0.03);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+      line-height: 1;
+    }
+
+    .contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .contact-left .section-title { margin-bottom: 1rem; }
+
+    .contact-left > p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.85;
+    }
+
+    .contact-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-bottom: 1.4rem;
+    }
+
+    .ci-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .ci-value {
+      font-size: 14px;
+      color: var(--white);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    a.ci-value:hover { color: var(--gold); }
+
+    .contact-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .cf-label {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .cf-input,
+    .cf-select,
+    .cf-textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 0.5px solid var(--border);
+      color: var(--white);
+      font-family: var(--font-b);
+      font-size: 14px;
+      padding: 10px 0;
+      outline: none;
+      transition: border-color 0.25s;
+    }
+
+    .cf-input::placeholder,
+    .cf-textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+    .cf-input:focus,
+    .cf-select:focus,
+    .cf-textarea:focus { border-color: var(--gold); }
+
+    .cf-select { appearance: none; cursor: none; }
+    .cf-select option { background: var(--dark); }
+
+    .cf-textarea { height: 80px; resize: none; }
+
+    .cf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+    .cf-submit {
+      background: transparent;
+      border: 0.5px solid rgba(201,168,76,0.4);
+      color: var(--gold);
+      font-family: var(--font-b);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 14px 32px;
+      cursor: none;
+      transition: background 0.25s, color 0.25s, border-color 0.25s;
+      align-self: flex-start;
+      margin-top: 0.5rem;
+    }
+
+    .cf-submit:hover {
+      background: var(--gold);
+      color: var(--black);
+      border-color: var(--gold);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 0.5px solid var(--border);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-family: var(--font-d);
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .footer-logo span { color: var(--gold); }
+
+    footer p { font-size: 11px; color: rgba(102,101,96,0.5); }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--white); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-24px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(24px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.visible,
+    .reveal-left.visible,
+    .reveal-right.visible { opacity: 1; transform: translate(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .work-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto;
+      }
+      .work-item:nth-child(n) { grid-column: auto; grid-row: auto; }
+      .brand-grid { grid-template-columns: 1fr; gap: 3rem; }
+    }
+
+    @media (max-width: 900px) {
+      body { cursor: auto; }
+      .cursor, .cursor-ring { display: none; }
+      nav { padding: 1.2rem 1.5rem; }
+      nav.scrolled { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { padding: 0 1.5rem 3rem; }
+      .hero-side-text { display: none; }
+      .hero-bottom-row { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+      .hero-cta-group { align-items: flex-start; }
+      .work-section { padding: 4rem 1.5rem; }
+      .work-header { flex-direction: column; align-items: flex-start; gap: 1.5rem; }
+      .work-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 200px 200px 200px; }
+      .work-item:nth-child(n) { grid-column: auto; grid-row: auto; }
+      .services-section { padding: 4rem 1.5rem; }
+      .services-grid { grid-template-columns: 1fr; }
+      .service-card { border-right: none; border-bottom: 0.5px solid var(--border); }
+      .about-section { padding: 4rem 1.5rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .about-float-card { right: 0; bottom: -1rem; }
+      .brand-section { padding: 4rem 1.5rem; }
+      .contact-section { padding: 4rem 1.5rem; }
+      .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .cf-row { grid-template-columns: 1fr; }
+      footer { padding: 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
+      .footer-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CURSOR -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">NOIR<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#trabajo">Trabajo</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#nosotros">Nosotros</a></li>
+      <li><a href="#marca">Marca</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a href="#contacto" class="nav-cta">Agendar sesión</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-canvas">
+      <div class="hero-grid"></div>
+      <div class="hero-vignette"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-line"></div>
+        <span>Estudio de fotografía · Bogotá</span>
+      </div>
+      <h1 class="hero-title">
+        La imagen<br>
+        que define<br>
+        tu <em>mundo</em>
+      </h1>
+      <div class="hero-bottom-row">
+        <p class="hero-desc">Fotografía editorial, retratos, campañas de marca e identidad visual para quienes entienden que la imagen lo es todo.</p>
+        <div class="hero-cta-group">
+          <a href="#trabajo" class="btn-primary">Ver portafolio</a>
+          <a href="#contacto" class="btn-link">
+            Agendar sesión
+            <span class="btn-link-arrow"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span class="marquee-item"><span>✦</span>Fotografía editorial</span>
+      <span class="marquee-item"><span>✦</span>Retratos de marca</span>
+      <span class="marquee-item"><span>✦</span>Campañas publicitarias</span>
+      <span class="marquee-item"><span>✦</span>Identidad visual</span>
+      <span class="marquee-item"><span>✦</span>Fotografía de producto</span>
+      <span class="marquee-item"><span>✦</span>Dirección de arte</span>
+      <span class="marquee-item"><span>✦</span>Fotografía editorial</span>
+      <span class="marquee-item"><span>✦</span>Retratos de marca</span>
+      <span class="marquee-item"><span>✦</span>Campañas publicitarias</span>
+      <span class="marquee-item"><span>✦</span>Identidad visual</span>
+      <span class="marquee-item"><span>✦</span>Fotografía de producto</span>
+      <span class="marquee-item"><span>✦</span>Dirección de arte</span>
+    </div>
+  </div>
+
+  <!-- WORK -->
+  <section class="work-section" id="trabajo">
+    <div class="work-header">
+      <div>
+        <p class="section-tag">Portafolio selecto</p>
+        <h2 class="section-title reveal">Trabajo reciente</h2>
+      </div>
+      <div class="work-filter">
+        <button class="filter-btn active" data-filter="all">Todo</button>
+        <button class="filter-btn" data-filter="editorial">Editorial</button>
+        <button class="filter-btn" data-filter="marca">Marca</button>
+        <button class="filter-btn" data-filter="retrato">Retrato</button>
+      </div>
+    </div>
+    <div class="work-grid">
+      <div class="work-item reveal">
+        <div class="work-fill wf1">
+          <div class="work-label">
+            <span class="work-label-cat">Editorial</span>
+            <span class="work-label-title">Colección Oscura</span>
+          </div>
+        </div>
+      </div>
+      <div class="work-item reveal">
+        <div class="work-fill wf2">
+          <div class="work-label">
+            <span class="work-label-cat">Retrato</span>
+            <span class="work-label-title">Luz & Sombra</span>
+          </div>
+        </div>
+      </div>
+      <div class="work-item reveal">
+        <div class="work-fill wf3">
+          <div class="work-label">
+            <span class="work-label-cat">Marca</span>
+            <span class="work-label-title">Campaña Atelier</span>
+          </div>
+        </div>
+      </div>
+      <div class="work-item reveal">
+        <div class="work-fill wf4">
+          <div class="work-label">
+            <span class="work-label-cat">Producto</span>
+            <span class="work-label-title">Still Life</span>
+          </div>
+        </div>
+      </div>
+      <div class="work-item reveal">
+        <div class="work-fill wf5">
+          <div class="work-label">
+            <span class="work-label-cat">Retrato</span>
+            <span class="work-label-title">Serie Mineral</span>
+          </div>
+        </div>
+      </div>
+      <div class="work-item reveal">
+        <div class="work-fill wf6">
+          <div class="work-label">
+            <span class="work-label-cat">Editorial</span>
+            <span class="work-label-title">Avant-Garde</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services-section" id="servicios">
+    <p class="section-tag">Lo que hacemos</p>
+    <h2 class="section-title reveal">Servicios</h2>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-num">01</div>
+        <h3>Fotografía editorial</h3>
+        <p>Sesiones de moda, arte y concepto para publicaciones, lookbooks y campañas de alto impacto visual.</p>
+        <div class="service-price">Desde $800 USD</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">02</div>
+        <h3>Identidad de marca</h3>
+        <p>Fotografía corporativa, retratos profesionales y contenido visual coherente para tu marca personal o empresa.</p>
+        <div class="service-price">Desde $500 USD</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">03</div>
+        <h3>Dirección de arte</h3>
+        <p>Concepto, producción y dirección completa de campañas visuales. Desde el moodboard hasta la entrega final.</p>
+        <div class="service-price">Desde $1.200 USD</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="about-section" id="nosotros">
+    <div class="about-grid">
+      <div class="about-visual reveal-left">
+        <div class="about-main">
+          <div class="about-corner-tl"></div>
+          <div class="about-corner-br"></div>
+          <div class="about-main-inner">NOIR</div>
+        </div>
+        <div class="about-float-card">
+          <div class="about-float-num">8+</div>
+          <div class="about-float-label">Años de experiencia</div>
+        </div>
+      </div>
+      <div class="about-text reveal-right">
+        <p class="section-tag">El estudio</p>
+        <h2 class="section-title">Obsesionados con la imagen perfecta</h2>
+        <p>Noir Studio nació de una convicción simple: cada imagen debe contar algo que las palabras no pueden. Trabajamos en la intersección entre el arte y la estrategia visual.</p>
+        <p>Nuestro equipo combina dirección artística, técnica fotográfica avanzada y un ojo clínico para la composición, la luz y el color.</p>
+        <div class="about-divider"></div>
+        <div class="about-stats-row">
+          <div>
+            <div class="astat-num">150+</div>
+            <div class="astat-label">Clientes</div>
+          </div>
+          <div>
+            <div class="astat-num">400+</div>
+            <div class="astat-label">Proyectos</div>
+          </div>
+          <div>
+            <div class="astat-num">12</div>
+            <div class="astat-label">Premios</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRAND GUIDE -->
+  <section class="brand-section" id="marca">
+    <p class="section-tag">Identidad incluida</p>
+    <h2 class="section-title reveal">Guía de marca</h2>
+    <div class="brand-grid">
+      <div class="brand-palette reveal-left">
+        <p class="brand-subtitle">Paleta de color</p>
+        <div class="palette-row">
+          <div class="palette-swatch" style="background:#080808;">
+            <span class="swatch-label">Negro</span>
+            <span class="swatch-hex">#080808</span>
+          </div>
+          <div class="palette-swatch" style="background:#161616;">
+            <span class="swatch-label">Superficie</span>
+            <span class="swatch-hex">#161616</span>
+          </div>
+          <div class="palette-swatch" style="background:#C9A84C;">
+            <span class="swatch-label">Oro</span>
+            <span class="swatch-hex">#C9A84C</span>
+          </div>
+          <div class="palette-swatch" style="background:#F2F0EC;">
+            <span class="swatch-label" style="color:rgba(0,0,0,0.5);">Crema</span>
+            <span class="swatch-hex" style="color:rgba(0,0,0,0.35)">#F2F0EC</span>
+          </div>
+        </div>
+        <div style="margin-top: 2.5rem;">
+          <p class="brand-subtitle">Uso de la marca</p>
+          <div style="background:var(--black); border:0.5px solid var(--border); padding:2rem; display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+            <span style="font-family:var(--font-d); font-size:2rem; font-weight:300; letter-spacing:0.3em; color:var(--white);">NOIR<span style="color:var(--gold)">.</span></span>
+          </div>
+          <div style="background:var(--white); border:0.5px solid rgba(0,0,0,0.1); padding:2rem; display:flex; align-items:center; justify-content:center;">
+            <span style="font-family:var(--font-d); font-size:2rem; font-weight:300; letter-spacing:0.3em; color:var(--black);">NOIR<span style="color:var(--gold)">.</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="brand-typography reveal-right">
+        <p class="brand-subtitle">Tipografía</p>
+        <div class="brand-type-sample">
+          <p class="type-label">Display — títulos principales</p>
+          <div class="type-display">Cormorant</div>
+          <p class="type-body">A B C D E F G H I J K L M<br>a b c d e f g h i j k l m</p>
+          <p class="type-name">Cormorant · Light 300 / Regular 400</p>
+        </div>
+        <div class="brand-type-sample">
+          <p class="type-label">Body — textos y navegación</p>
+          <div style="font-family:var(--font-b); font-size:1.3rem; color:var(--white); line-height:1;">Tenor Sans</div>
+          <p class="type-body">A B C D E F G H I J K L M<br>a b c d e f g h i j k l m</p>
+          <p class="type-name">Tenor Sans · Regular 400</p>
+        </div>
+        <div>
+          <p class="type-label">Jerarquía tipográfica</p>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:0.5rem;">
+            <div style="font-family:var(--font-d); font-size:2rem; font-weight:300; color:var(--white); line-height:1;">Título H1</div>
+            <div style="font-family:var(--font-d); font-size:1.4rem; font-weight:300; color:var(--white); line-height:1;">Título H2</div>
+            <div style="font-size:13px; color:var(--muted);">Texto de cuerpo regular — Tenor Sans 14px</div>
+            <div style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold);">Etiqueta — Tenor Sans caps</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-section" id="contacto">
+    <div class="contact-bg-text">NOIR</div>
+    <div class="contact-inner">
+      <div class="contact-left reveal-left">
+        <p class="section-tag">¿Tienes un proyecto?</p>
+        <h2 class="section-title">Hablemos</h2>
+        <p>Cuéntanos sobre tu proyecto, tu visión y lo que quieres comunicar. Respondemos en 24 horas con una propuesta inicial.</p>
+        <div class="contact-item">
+          <span class="ci-label">WhatsApp</span>
+          <a href="https://wa.me/573000000000" class="ci-value" target="_blank">+57 300 000 0000</a>
+        </div>
+        <div class="contact-item">
+          <span class="ci-label">Correo</span>
+          <a href="mailto:hola@noirstudio.co" class="ci-value">hola@noirstudio.co</a>
+        </div>
+        <div class="contact-item">
+          <span class="ci-label">Instagram</span>
+          <a href="#" class="ci-value">@noirstudio.co</a>
+        </div>
+      </div>
+      <div class="contact-right reveal-right">
+        <div class="cf-row">
+          <div>
+            <label class="cf-label">Nombre</label>
+            <input class="cf-input" type="text" placeholder="Tu nombre">
+          </div>
+          <div>
+            <label class="cf-label">Empresa / Marca</label>
+            <input class="cf-input" type="text" placeholder="Nombre de marca">
+          </div>
+        </div>
+        <div>
+          <label class="cf-label">Tipo de proyecto</label>
+          <select class="cf-select">
+            <option>Fotografía editorial</option>
+            <option>Identidad de marca</option>
+            <option>Dirección de arte</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div>
+          <label class="cf-label">Presupuesto aproximado</label>
+          <select class="cf-select">
+            <option>$500 – $800 USD</option>
+            <option>$800 – $1.200 USD</option>
+            <option>$1.200 USD en adelante</option>
+          </select>
+        </div>
+        <div>
+          <label class="cf-label">Cuéntanos tu visión</label>
+          <textarea class="cf-textarea" placeholder="¿Qué quieres comunicar con este proyecto?"></textarea>
+        </div>
+        <button class="cf-submit" onclick="this.textContent='Enviado ✓'; this.style.background='var(--gold)'; this.style.color='var(--black)'; setTimeout(()=>{this.textContent='Enviar propuesta'; this.style.background=''; this.style.color=''},3000)">
+          Enviar propuesta
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <!-- SIDE TEXT -->
+  <div class="hero-side-text">Fotografía · Arte · Identidad Visual</div>
+
+  <footer>
+    <span class="footer-logo">NOIR<span>.</span></span>
+    <ul class="footer-links">
+      <li><a href="#trabajo">Trabajo</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#marca">Marca</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <p>© 2025 Noir Studio · Bogotá</p>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top = my + 'px';
+    });
+
+    function animateRing() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    document.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        cursor.style.width = '14px';
+        cursor.style.height = '14px';
+        ring.style.width = '54px';
+        ring.style.height = '54px';
+        ring.style.opacity = '0.3';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.style.width = '8px';
+        cursor.style.height = '8px';
+        ring.style.width = '36px';
+        ring.style.height = '36px';
+        ring.style.opacity = '0.5';
+      });
+    });
+
+    // Nav scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 100);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => obs.observe(el));
+
+    // Filter buttons (visual only)
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>
