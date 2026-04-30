@@ -1,0 +1,12 @@
+# Lumio — robots.txt
+# Permite que todos los motores de búsqueda indexen el sitio
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://lumioOG.github.io/sitemap.xml
+
+# No indexar carpetas de sistema (si existieran)
+Disallow: /.github/
+Disallow: /node_modules/
