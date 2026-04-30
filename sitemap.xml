@@ -1,1 +1,38 @@
-https://lumioOG.github.io/ 2025-04-29 monthly 1.0 https://lumioOG.github.io/elume-studio/ 2025-04-29 yearly 0.6 https://lumioOG.github.io/cafe-miron/ 2025-04-29 yearly 0.6 https://lumioOG.github.io/noir-studio/ 2025-04-29 yearly 0.6
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Página principal -->
+  <url>
+    <loc>https://lumioOG.github.io/</loc>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="es" href="https://lumioOG.github.io/"/>
+  </url>
+
+  <!-- Demo Starter -->
+  <url>
+    <loc>https://lumioOG.github.io/elume-studio/</loc>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Demo Negocio Digital -->
+  <url>
+    <loc>https://lumioOG.github.io/cafe-miron/</loc>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Demo Premium -->
+  <url>
+    <loc>https://lumioOG.github.io/noir-studio/</loc>
+    <lastmod>2025-04-29</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>
